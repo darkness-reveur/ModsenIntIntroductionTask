@@ -60,7 +60,8 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
         {
             var users = await _meetupPlatformContext.Users
                 .Include(user => user.Role)
-                    .ThenInclude(role => role.Permissions)
+                    .ThenInclude(role => role.RolePermissions)
+                        .ThenInclude(rolePerm => rolePerm.Permission)
                 .ToListAsync();
 
             return users;
@@ -70,8 +71,10 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
         {
             var user = await _meetupPlatformContext.Users
                 .Include(user => user.Role)
-                    .ThenInclude(role => role.Permissions)
-                .Include(user => user.Meetups)
+                    .ThenInclude(role => role.RolePermissions)
+                        .ThenInclude(rolePerm => rolePerm.Permission)
+                .Include(user => user.MeetupVisitors)
+                    .ThenInclude(meetupVisitor => meetupVisitor.User)
                 .FirstOrDefaultAsync(user => user.Id == userId);
 
             return user;

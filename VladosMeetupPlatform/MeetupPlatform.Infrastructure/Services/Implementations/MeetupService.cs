@@ -1,12 +1,8 @@
 ﻿using MeetupPlatform.Common.Models.MeetUps;
+using MeetupPlatform.Common.Models.Users;
 using MeetupPlatform.Infrastructure.Database;
 using MeetupPlatform.Infrastructure.Services.Interfacies;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MeetupPlatform.Infrastructure.Services.Implementations
 {
@@ -19,16 +15,18 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             _meetupPlatformContext = meetupPlatformContext;
         }
 
-        public async Task<bool> AddMeetupAsync(Meetup meetup)
+        public async Task<Meetup> AddMeetupAsync(Meetup meetup)
         {
             if (meetup is not null)
             {
                 await _meetupPlatformContext.Meetups.AddAsync(meetup);
 
-                return true;
+                await _meetupPlatformContext.SaveChangesAsync();
+
+                return meetup;
             }
 
-            return false;
+            return meetup;
         }
 
         public async Task<bool> DeleteMeetupByIdAsync(int id)
@@ -56,20 +54,21 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             var meetups = await _meetupPlatformContext.Meetups
                 .Include(meetup => meetup.Place)
                 .Include(meetup => meetup.Steps)
-                .Include(meetup => meetup.UserSpeakers)
+                    .ThenInclude(step => step.UserSpeaker)
                 .ToListAsync();
 
             return meetups;
         }
 
-        public async Task<Meetup> GetMeetupByIdForOrganiser(int id)
+        public async Task<Meetup> GetMeetupByIdForOrganiserAsync(int id)
         {
             var meetup = await _meetupPlatformContext.Meetups
                 .Include(meetup => meetup.Followers)
                 .Include(meetup => meetup.Place)
                 .Include(meetup => meetup.Steps)
-                .Include(meetup => meetup.UserSpeakers)
+                    .ThenInclude(step => step.UserSpeaker)
                 .Include(meetup => meetup.UserVisitors)
+                    .ThenInclude(userVisitor => userVisitor.User)
                 .FirstOrDefaultAsync(meetup => meetup.Id == id);
 
             return meetup;
@@ -82,7 +81,7 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
                 var meetup = await _meetupPlatformContext.Meetups
                     .Include(meetup => meetup.Place)
                     .Include(meetup => meetup.Steps)
-                    .Include(meetup => meetup.UserSpeakers)
+                        .ThenInclude(step => step.UserSpeaker)
                     .FirstOrDefaultAsync(meetup => meetup.Id == id);
 
                 return meetup;
@@ -112,8 +111,6 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
                 exMeetup.Place = newMeetup.Place;
 
                 exMeetup.Steps = newMeetup.Steps;
-
-                exMeetup.UserSpeakers = newMeetup.UserSpeakers;
 
                 _meetupPlatformContext.Meetups.Update(exMeetup);
 
@@ -195,10 +192,6 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
                     exPlace.Name = newPlace.Name;
 
-                    exPlace.StartTime = newPlace.StartTime;
-
-                    exPlace.EndTime = newPlace.EndTime;
-
                     exPlace.LinkToGoogleMap = newPlace.LinkToGoogleMap;
 
                     exPlace.CountOfPlaces = newPlace.CountOfPlaces;
@@ -208,5 +201,17 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             }
             return false;
         }
+
+
+        public async Task<IEnumerable<Role>> GetRoles()
+        {
+            var roles = await _meetupPlatformContext.Roles
+                .Include(role => role.RolePermissions)
+                    .ThenInclude(rolePerm => rolePerm.Permission)
+                .ToListAsync();
+
+            return roles;
+        }
+        
     }
 }

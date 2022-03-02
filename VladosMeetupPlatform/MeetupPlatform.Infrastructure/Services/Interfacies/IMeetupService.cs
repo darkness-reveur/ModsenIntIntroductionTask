@@ -1,9 +1,5 @@
 ﻿using MeetupPlatform.Common.Models.MeetUps;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MeetupPlatform.Common.Models.Users;
 
 namespace MeetupPlatform.Infrastructure.Services.Interfacies
 {
@@ -13,9 +9,9 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
 
         Task<Meetup> GetMeetupByIdForVisitorAsync(int id);
 
-        Task<Meetup> GetMeetupByIdForOrganiser(int id);
+        Task<Meetup> GetMeetupByIdForOrganiserAsync(int id);
 
-        Task<bool> AddMeetupAsync(Meetup meetup);
+        Task<Meetup> AddMeetupAsync(Meetup meetup);
 
         Task<bool> DeleteMeetupByIdAsync(int id);
 
@@ -28,5 +24,7 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
         Task<bool> DeleteStepAsync(int id);
 
         Task<bool> UpdatePlaceAsync(Place newPlace);
+
+        Task<IEnumerable<Role>> GetRoles();
     }
 }

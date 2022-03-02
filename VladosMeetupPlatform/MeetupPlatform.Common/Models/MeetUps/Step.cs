@@ -21,14 +21,14 @@ namespace MeetupPlatform.Common.Models.MeetUps
         [Required]
         public int MeetupId { get; set; }
 
-        [ForeignKey("MeetUpId")]
+        [ForeignKey("MeetupId")]
         public virtual Meetup Meetup { get; set; }
 
         public string? Description { get; set; }
               
         public int? UserSpeakerId { get; set; }
 
-        [ForeignKey("SpeakerId")]
+        [ForeignKey("UserSpeakerId")]
         public virtual User? UserSpeaker { get; set; }
     }
 }

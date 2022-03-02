@@ -1,33 +1,19 @@
-using MeetupPlatform.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
+using VladosMeetupPlatform.API;
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorPages();
-
-var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<MeetupPlatformContext>(option =>
-    option.UseNpgsql(dbConnectionString));
-
-var app = builder.Build();
-
-if (!app.Environment.IsDevelopment())
+namespace VladosMeetupPlatform
 {
-    app.UseExceptionHandler("/Error");
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
 
-    app.UseHsts();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapRazorPages();
-
-app.Run();

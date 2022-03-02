@@ -7,8 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MeetupPlatform.Common\MeetupPlatform.Common.csproj" />
     <ProjectReference Include="..\MeetupPlatform.Infrastructure\MeetupPlatform.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+    <Folder Include="ViewModels\Users\" />
   </ItemGroup>
 
 </Project>

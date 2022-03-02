@@ -1,4 +1,5 @@
-﻿using MeetupPlatform.Common.Models.MeetUps;
+﻿using MeetupPlatform.Common.Models.HelperModels;
+using MeetupPlatform.Common.Models.MeetUps;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -29,6 +30,8 @@ namespace MeetupPlatform.Common.Models.Users
         [ForeignKey("RoleId")]
         public virtual Role Role { get; set; }
 
-        public virtual List<Meetup> Meetups { get; set; }
+        public virtual List<MeetupVisitor> MeetupVisitors { get; set; }
+
+        public virtual List<Step> Steps { get; set; }
     }
 }

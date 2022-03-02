@@ -4,10 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MeetupPlatform.Common.Models.Users
 {
-    public class Follower
+    public class Organizer
     {
         [Key]
-        public string Email { get; set; }
+        public int Id { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual User User { get; set; }
 
         public int MeetupId { get; set; }
 
