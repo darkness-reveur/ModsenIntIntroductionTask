@@ -9,6 +9,7 @@ namespace MeetupPlatform.Common.Models.Users
         [Key]
         public string Email { get; set; }
 
+        [Required]
         public int MeetupId { get; set; }
 
         [ForeignKey("MeetupId")]

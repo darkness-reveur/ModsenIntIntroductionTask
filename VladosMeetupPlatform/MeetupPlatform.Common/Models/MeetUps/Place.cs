@@ -8,10 +8,10 @@ namespace MeetupPlatform.Common.Models.MeetUps
         public int Id { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; }    
 
         [Required]
-        public string LinkToGoogleMap { get; set; }
+        public string? LinkToGoogleMap { get; set; }
 
         [Required]
         public int CountOfPlaces { get; set; }

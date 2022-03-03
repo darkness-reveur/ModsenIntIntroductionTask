@@ -30,8 +30,8 @@ namespace MeetupPlatform.Common.Models.Users
         [ForeignKey("RoleId")]
         public virtual Role Role { get; set; }
 
-        public virtual List<MeetupVisitor> MeetupVisitors { get; set; }
+        public virtual List<MeetupVisitor>? MeetupVisitors { get; set; }
 
-        public virtual List<Step> Steps { get; set; }
+        public virtual List<Step>? Steps { get; set; }
     }
 }

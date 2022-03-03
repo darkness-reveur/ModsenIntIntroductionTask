@@ -24,10 +24,10 @@ namespace MeetupPlatform.Common.Models.MeetUps
         public int CountOfVisitors { get; set; }
 
         [Required]
-        public int OrganizerId { get; set; }
+        public int UserOrganizerId { get; set; }
 
-        [ForeignKey("OrganizerId")]
-        public virtual Organizer Organizer { get; set; }
+        [ForeignKey("UserOrganizerId")]
+        public virtual User Organizer { get; set; }
 
         public string? Description { get; set; }
 
@@ -38,10 +38,10 @@ namespace MeetupPlatform.Common.Models.MeetUps
         [ForeignKey("PlaceId")]
         public virtual Place? Place { get; set; }
 
-        public virtual List<Step> Steps { get; set; }
+        public virtual List<Step>? Steps { get; set; }
 
-        public virtual List<Follower> Followers { get; set; }
+        public virtual List<Follower>? Followers { get; set; }
 
-        public virtual List<MeetupVisitor> UserVisitors { get; set; }
+        public virtual List<MeetupVisitor>? UserVisitors { get; set; }
     }
 }
