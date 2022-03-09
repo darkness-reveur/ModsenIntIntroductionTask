@@ -1,4 +1,5 @@
-﻿using MeetupPlatform.Infrastructure.Services.Implementations;
+﻿using MeetupPlatform.Infrastructure.Services.AuthenticationService;
+using MeetupPlatform.Infrastructure.Services.Implementations;
 using MeetupPlatform.Infrastructure.Services.Interfacies;
 
 namespace VladosMeetupPlatform.API
@@ -10,6 +11,8 @@ namespace VladosMeetupPlatform.API
             service.AddTransient<IMeetupService, MeetupService>();
 
             service.AddTransient<IUserService, UserService>();
+
+            service.AddTransient<IAuthService, AuthService>();
         }
     }
 }

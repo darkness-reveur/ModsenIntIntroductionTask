@@ -1,5 +1,4 @@
 ﻿using MeetupPlatform.Common.Models.MeetUps;
-using MeetupPlatform.Common.Models.Users;
 using MeetupPlatform.Infrastructure.Database;
 using MeetupPlatform.Infrastructure.Services.Interfacies;
 using Microsoft.EntityFrameworkCore;
@@ -172,7 +171,7 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
                     _meetupPlatformContext.Steps.Update(exStep);
 
                     await _meetupPlatformContext.SaveChangesAsync();
-                    
+
                     return true;
                 }
             }
@@ -201,17 +200,5 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             }
             return false;
         }
-
-
-        public async Task<IEnumerable<Role>> GetRoles()
-        {
-            var roles = await _meetupPlatformContext.Roles
-                .Include(role => role.RolePermissions)
-                    .ThenInclude(rolePerm => rolePerm.Permission)
-                .ToListAsync();
-
-            return roles;
-        }
-        
     }
 }

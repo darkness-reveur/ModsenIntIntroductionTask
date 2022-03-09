@@ -10,21 +10,21 @@ namespace MeetupPlatform.Common.Models.Users
         [Key]
         public int Id { get; set; }
 
-        [Required]
+        //[Required]
         public string Name { get; set; }
 
-        [Required]
+        //[Required]
         public string Email { get; set; }
 
-        [Required]
+        //[Required]
         public bool IsCompany { get; set; }
 
-        [Required]
+        //[Required]
         public bool IsUserBlocked { get; set; } = false;
 
         public int? Age { get; set; }
         
-        [Required]
+        //[Required]
         public int RoleId { get; set; }
 
         [ForeignKey("RoleId")]

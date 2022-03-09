@@ -1,4 +1,5 @@
 ﻿using MeetupPlatform.Common.Models.Users;
+using MeetupPlatform.Common.Models.ViewModels;
 using MeetupPlatform.Infrastructure.Database;
 using MeetupPlatform.Infrastructure.Services.Interfacies;
 using Microsoft.EntityFrameworkCore;
@@ -56,17 +57,6 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             return false;
         }
 
-        public async Task<List<User>> GetAllAsync()
-        {
-            var users = await _meetupPlatformContext.Users
-                .Include(user => user.Role)
-                    .ThenInclude(role => role.RolePermissions)
-                        .ThenInclude(rolePerm => rolePerm.Permission)
-                .ToListAsync();
-
-            return users;
-        }
-
         public async Task<User> GetUserByIdAsync(int userId)
         {
             var user = await _meetupPlatformContext.Users
@@ -100,6 +90,68 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
                 return exUser;
             }
             return null;
+        }
+
+        public async Task<IEnumerable<UserViewModel>> GetAllAsync()
+        {
+            var users = await _meetupPlatformContext.Users
+                .ToListAsync();
+
+            var viewUsers = new List<UserViewModel>();
+
+            foreach (var user in users)
+            {
+                var role = await _meetupPlatformContext.Roles
+                    .FirstOrDefaultAsync(role => role.Id == user.RoleId);
+
+                var viewUser = new UserViewModel(user);
+
+                var viewRole = await GetViewRole(role);
+
+                viewUser.Role = viewRole;
+
+                viewUsers.Add(viewUser);
+            }
+
+            return viewUsers;
+        }
+
+        public async Task<IEnumerable<RoleViewModel>> GetRoles()
+        {
+            var roles = await _meetupPlatformContext.Roles
+                .ToListAsync();
+
+            var rolesList = new List<RoleViewModel>();
+
+            foreach (var role in roles)
+            {
+                var newRole = await GetViewRole(role);
+
+                rolesList.Add(newRole);
+            }
+
+            return rolesList;
+        }
+
+        private async Task<RoleViewModel> GetViewRole(Role role)
+        {
+            var permissionsId = await _meetupPlatformContext.RolePermissions
+                    .Where(rp => rp.RoleId == role.Id)
+                    .Select(perm => perm.PermissionId)
+                    .ToListAsync();
+
+            var perms = await _meetupPlatformContext.Permissions
+                .Where(perm => permissionsId.Contains(perm.Id))
+                .ToListAsync();
+
+            var newRole = new RoleViewModel()
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Permissions = perms
+            };
+
+            return newRole;
         }
     }
 }

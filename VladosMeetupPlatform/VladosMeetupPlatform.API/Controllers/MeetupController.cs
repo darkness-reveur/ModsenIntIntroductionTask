@@ -76,14 +76,5 @@ namespace VladosMeetupPlatform.API.Controllers
 
             return BadRequest();
         }
-
-        [HttpGet]
-        [Route("GetRoles")]
-        public async Task<IActionResult> GetRoles()
-        {
-            var roles = await _meetupService.GetRoles();
-
-            return Ok(roles);
-        }
     }
 }

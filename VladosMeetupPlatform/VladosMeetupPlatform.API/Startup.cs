@@ -1,6 +1,9 @@
 ﻿using MeetupPlatform.Infrastructure.Database;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using VladosMeetupPlatform.API.Auth;
 
 namespace VladosMeetupPlatform.API
 {
@@ -46,6 +49,31 @@ namespace VladosMeetupPlatform.API
 
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
+
+            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //        .AddJwtBearer(options =>
+            //        {
+            //            options.RequireHttpsMetadata = false;
+            //            options.TokenValidationParameters = new TokenValidationParameters
+            //            {
+            //                ValidateIssuer = true,
+            //                ValidIssuer = AuthOptions.Issuer,
+            //                ValidateAudience = true,
+            //                ValidAudience = AuthOptions.Audience,
+            //                ValidateLifetime = true,
+            //                IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+            //                ValidateIssuerSigningKey = true,
+            //            };
+
+            //            options.Events = new JwtBearerEvents
+            //            {
+            //                OnMessageReceived = context =>
+            //                {
+            //                    context.Token = context.Request.Cookies["Token"];
+            //                    return Task.CompletedTask;
+            //                },
+            //            };
+            //        });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,9 +98,9 @@ namespace VladosMeetupPlatform.API
 
             app.UseStaticFiles();
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

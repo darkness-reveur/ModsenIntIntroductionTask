@@ -1,5 +1,6 @@
 ﻿using MeetupPlatform.Common.Models.MeetUps;
 using MeetupPlatform.Common.Models.Users;
+using MeetupPlatform.Common.Models.ViewModels;
 
 namespace MeetupPlatform.Infrastructure.Services.Interfacies
 {
@@ -24,7 +25,5 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
         Task<bool> DeleteStepAsync(int id);
 
         Task<bool> UpdatePlaceAsync(Place newPlace);
-
-        Task<IEnumerable<Role>> GetRoles();
     }
 }
