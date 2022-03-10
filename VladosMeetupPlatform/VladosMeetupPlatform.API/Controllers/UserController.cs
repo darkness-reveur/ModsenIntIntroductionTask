@@ -17,6 +17,7 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService
@@ -32,11 +33,12 @@ namespace VladosMeetupPlatform.API.Controllers
 
         [HttpGet]
         [Route("GetUser")]
+        [Authorize]
         public async Task<IActionResult> GetUser(int id)
         {
             if(id > 0)
             {
-                var user = _userService.GetUserByIdAsync(id);
+                var user = await _userService.GetUserByIdAsync(id);
 
                 return Ok(user);
             }
@@ -44,6 +46,7 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "editor")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             if(id > 0)
@@ -56,9 +59,10 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(User newUser)
         {
-            var user = _userService.UpdateUserAsync(newUser);
+            var user = await _userService.UpdateUserAsync(newUser);
 
             return Ok(user);
         }

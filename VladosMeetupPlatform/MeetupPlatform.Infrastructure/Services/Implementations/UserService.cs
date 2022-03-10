@@ -55,22 +55,21 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            if(userId < 1)
+            if (userId > 0)
             {
-                return null;
+                var user = await _meetupPlatformContext.Users
+                   .Include(user => user.Role)
+                           .ThenInclude(role => role.Permissions)
+                   .FirstOrDefaultAsync(user => user.Id == userId);
+
+                return user;
             }
-
-            var user = await _meetupPlatformContext.Users
-                .Include(user => user.Role)
-                        .ThenInclude(role => role.Permissions)
-                .FirstOrDefaultAsync(user => user.Id == userId);
-
-            return user;
+            return null;            
         }
 
         public async Task<User> UpdateUserAsync(User newUser)
         {
-            if(newUser is null)
+            if (newUser is null)
             {
                 var exUser = await _meetupPlatformContext.Users
                 .FirstOrDefaultAsync(user => user.Id == newUser.Id);
@@ -83,8 +82,6 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
                     exUser.Name = newUser.Name;
 
-                    _meetupPlatformContext.Users.Update(exUser);
-
                     await _meetupPlatformContext.SaveChangesAsync();
 
                     return exUser;
@@ -96,11 +93,12 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<bool> DeleteUserAsync(int userId)
         {
-            if(userId > 0)
+            if (userId > 0)
             {
                 var user = await _meetupPlatformContext.Users
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(user => user.Id == userId);
-                
+
                 if (user is not null)
                 {
                     _meetupPlatformContext.Users.Remove(user);

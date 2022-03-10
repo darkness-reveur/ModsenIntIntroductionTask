@@ -53,10 +53,6 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
                 ClaimsIdentity.DefaultNameClaimType,
                 ClaimsIdentity.DefaultRoleClaimType);
 
-            //await HttpContext.SignInAsync(
-            //   JwtBearerDefaults.AuthenticationScheme,
-            //   new ClaimsPrincipal(identity));
-
             return identity;
         }
 
@@ -75,9 +71,7 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
                 return Ok(false);
             }
 
-            var user = await _authService.LogIn(
-                    data.Login,
-                    data.Password);
+            var user = await _authService.LogIn(data);
 
             if (user == null)
             {
@@ -132,15 +126,19 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
                 return BadRequest();
             }
 
-            var user = await _userService
-                .AddUserAsync(data.User);
+            if (await _authService.IsLoginFree(data.Login))
+            {
+                var user = await _userService
+                    .AddUserAsync(data.User);
 
-            await _authService.Register(
-                data.Login,
-                data.Password,
-                user);
+                data.User = user;
 
-            return Ok(user);
+                await _authService.Register(data);
+
+                return Ok(user);
+            }
+
+            return BadRequest();
         }
     }
 }

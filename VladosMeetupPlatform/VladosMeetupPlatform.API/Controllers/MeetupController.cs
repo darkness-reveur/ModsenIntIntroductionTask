@@ -17,8 +17,8 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpGet]
-        [Route("GetAllMeetupsForVisitor")]
-        public async Task<IActionResult> GetAllMeetupsForVisitor()
+        [Route("GetAllMeetups")]
+        public async Task<IActionResult> GetAllMeetups()
         {
             var meetups = await _meetupService
                 .GetAllMeetupsAsync();
@@ -32,12 +32,10 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpGet]
-        [Route("GetMeetupByIdForOrganiser")]
-        [Authorize(Roles = "editor")]
-        public async Task<IActionResult> GetMeetupByIdForOrganiser(int id)
+        [Route("GetMeetupById")]
+        [Authorize]
+        public async Task<IActionResult> GetMeetupById(int id)
         {
-            
-
             var meetup = await _meetupService
                 .GetMeetupByIdAsync(id);
 

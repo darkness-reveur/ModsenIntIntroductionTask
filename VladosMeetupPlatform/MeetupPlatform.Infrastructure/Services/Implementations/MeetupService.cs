@@ -19,10 +19,12 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             if (meetup is not null
                 && meetup.Id == 0)
             {
-                await _meetupPlatformContext.Meetups.AddAsync(meetup);
-
-                var org = await _meetupPlatformContext.Users
+                var organizer = await _meetupPlatformContext.Users
                     .FirstOrDefaultAsync(user => user.Id == meetup.UserOrganizerId);
+
+                meetup.Organizer = organizer;
+
+                await _meetupPlatformContext.Meetups.AddAsync(meetup);
 
                 await _meetupPlatformContext.SaveChangesAsync();
             }
@@ -63,13 +65,17 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<Meetup> GetMeetupByIdAsync(int id)
         {
-            var meetup = await _meetupPlatformContext.Meetups
+            if (id > 0)
+            {
+                var meetup = await _meetupPlatformContext.Meetups
                 .Include(meetup => meetup.Place)
                 .Include(meetup => meetup.Steps)
                     .ThenInclude(step => step.UserSpeaker)
                 .FirstOrDefaultAsync(meetup => meetup.Id == id);
 
-            return meetup;
+                return meetup;
+            }
+            return null;
         }
 
         public async Task<bool> UpdateMeetupAsync(Meetup newMeetup)
@@ -79,27 +85,28 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
                 var exMeetup = await _meetupPlatformContext.Meetups
                     .FirstOrDefaultAsync(meetup => meetup.Id == newMeetup.Id);
 
-                exMeetup.Name = newMeetup.Name;
+                if(exMeetup is not null)
+                {
+                    exMeetup.Name = newMeetup.Name;
 
-                exMeetup.Description = newMeetup.Description;
+                    exMeetup.Description = newMeetup.Description;
 
-                exMeetup.StartTime = newMeetup.StartTime;
+                    exMeetup.StartTime = newMeetup.StartTime;
 
-                exMeetup.EndTime = newMeetup.EndTime;
+                    exMeetup.EndTime = newMeetup.EndTime;
 
-                exMeetup.IsMeetForAuthorizedUsers = newMeetup.IsMeetForAuthorizedUsers;
+                    exMeetup.IsMeetForAuthorizedUsers = newMeetup.IsMeetForAuthorizedUsers;
 
-                exMeetup.CountOfVisitors = newMeetup.CountOfVisitors;
+                    exMeetup.CountOfVisitors = newMeetup.CountOfVisitors;
 
-                exMeetup.Place = newMeetup.Place;
+                    exMeetup.Place = newMeetup.Place;
 
-                exMeetup.Steps = newMeetup.Steps;
+                    exMeetup.Steps = newMeetup.Steps;
 
-                _meetupPlatformContext.Meetups.Update(exMeetup);
+                    await _meetupPlatformContext.SaveChangesAsync();
 
-                await _meetupPlatformContext.SaveChangesAsync();
-
-                return true;
+                    return true;
+                }
             }
             return false;
         }
@@ -108,11 +115,17 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
         {
             if (step is not null)
             {
-                await _meetupPlatformContext.Steps.AddAsync(step);
+                var exMeetup = await _meetupPlatformContext.Meetups
+                    .FirstOrDefaultAsync(meetup => meetup.Id == step.MeetupId);
 
-                await _meetupPlatformContext.SaveChangesAsync();
+                if(exMeetup is not null)
+                {
+                    exMeetup.Steps.Add(step);
 
-                return true;
+                    await _meetupPlatformContext.SaveChangesAsync();
+
+                    return true;
+                }                
             }
             return false;
         }
@@ -122,6 +135,7 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             if (id > 0)
             {
                 var exStep = await _meetupPlatformContext.Steps
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(step => step.Id == id);
 
                 if (exStep is not null)
@@ -153,8 +167,6 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
                     exStep.EndTime = newStep.EndTime;
 
                     exStep.UserSpeakerId = newStep.UserSpeakerId;
-
-                    _meetupPlatformContext.Steps.Update(exStep);
 
                     await _meetupPlatformContext.SaveChangesAsync();
 

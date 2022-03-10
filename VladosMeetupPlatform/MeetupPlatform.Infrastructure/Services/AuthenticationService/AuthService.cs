@@ -28,40 +28,40 @@ namespace MeetupPlatform.Infrastructure.Services.AuthenticationService
             return false;
         }
 
-        public async Task<User> LogIn(string login, string password)
+        public async Task<User> LogIn(LoginData loginData)
         {
-            var salt = await GetUserSaltByLogin(login);
+            var salt = await GetUserSaltByLogin(loginData.Login);
 
-            if(salt is null)
+            if (salt is not null)
             {
-                return null;
+                var passwordSalt = Cryptographer.Encrypt(loginData.Password, salt);
+
+                var accessData = await _meetupPlatformContext.AccessData
+                    .Include(accessData => accessData.User)
+                    .FirstOrDefaultAsync(
+                    data => data.Login == loginData.Login
+                    && data.PasswordSalt == passwordSalt);
+
+                var userRole = await _meetupPlatformContext.Roles
+                    .FirstOrDefaultAsync(role => role.Id == accessData.User.RoleId);
+
+                accessData.User.Role = userRole;
+
+                return accessData.User;
             }
 
-            var passwordSalt = Cryptographer.Encrypt(password, salt);
-
-            var accessData = await _meetupPlatformContext.AccessData
-                .Include(accessData => accessData.User)
-                .FirstOrDefaultAsync(
-                data => data.Login == login
-                && data.PasswordSalt == passwordSalt);
-
-            var userRole = await _meetupPlatformContext.Roles
-                .FirstOrDefaultAsync(role => role.Id == accessData.User.RoleId);
-
-            accessData.User.Role = userRole;
-
-            return accessData.User;
+            return null;
         }
 
-        public async Task Register(string login, string password, User user)
+        public async Task Register(RegisterData registerData)
         {
-            var encryptedPassword = Cryptographer.Encrypt(password, out byte[] salt);
+            var encryptedPassword = Cryptographer.Encrypt(registerData.Password, out byte[] salt);
 
             var accessData = new AccessDataEntity
             {
-                Login = login,
+                Login = registerData.Login,
                 PasswordSalt = encryptedPassword,
-                UserId = user.Id,
+                UserId = registerData.User.Id,
                 Salt = salt,
             };
 

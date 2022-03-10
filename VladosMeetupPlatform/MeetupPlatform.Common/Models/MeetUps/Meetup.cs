@@ -19,8 +19,7 @@ namespace MeetupPlatform.Common.Models.MeetUps
         [Required]
         public DateTime EndTime { get; set; }
 
-        [Required]
-        public int CountOfVisitors { get; set; }
+        public int? CountOfVisitors { get; set; }
 
         [Required]
         public int UserOrganizerId { get; set; }
