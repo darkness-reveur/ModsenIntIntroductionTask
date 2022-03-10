@@ -32,12 +32,23 @@ namespace MeetupPlatform.Infrastructure.Services.AuthenticationService
         {
             var salt = await GetUserSaltByLogin(login);
 
+            if(salt is null)
+            {
+                return null;
+            }
+
             var passwordSalt = Cryptographer.Encrypt(password, salt);
 
             var accessData = await _meetupPlatformContext.AccessData
                 .Include(accessData => accessData.User)
-                .FirstOrDefaultAsync(data => data.Login == login
+                .FirstOrDefaultAsync(
+                data => data.Login == login
                 && data.PasswordSalt == passwordSalt);
+
+            var userRole = await _meetupPlatformContext.Roles
+                .FirstOrDefaultAsync(role => role.Id == accessData.User.RoleId);
+
+            accessData.User.Role = userRole;
 
             return accessData.User;
         }
@@ -63,6 +74,11 @@ namespace MeetupPlatform.Infrastructure.Services.AuthenticationService
         {
             var accessData = await _meetupPlatformContext.AccessData
                 .FirstOrDefaultAsync(accessDataEntity => accessDataEntity.Login == login);
+
+            if (accessData is null)
+            {
+                return null;
+            }
 
             return accessData.Salt;
         }

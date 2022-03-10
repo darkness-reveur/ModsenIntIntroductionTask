@@ -1,16 +1,12 @@
 ﻿using MeetupPlatform.Common.Models.MeetUps;
-using MeetupPlatform.Common.Models.Users;
-using MeetupPlatform.Common.Models.ViewModels;
 
 namespace MeetupPlatform.Infrastructure.Services.Interfacies
 {
     public interface IMeetupService
     {
-        Task<IEnumerable<Meetup>> GetAllMeetupsForVisitorAsync();
+        Task<IEnumerable<Meetup>> GetAllMeetupsAsync();
 
-        Task<Meetup> GetMeetupByIdForVisitorAsync(int id);
-
-        Task<Meetup> GetMeetupByIdForOrganiserAsync(int id);
+        Task<Meetup> GetMeetupByIdAsync(int id);
 
         Task<Meetup> AddMeetupAsync(Meetup meetup);
 

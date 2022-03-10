@@ -1,5 +1,4 @@
-﻿using MeetupPlatform.Common.Models.HelperModels;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MeetupPlatform.Common.Models.Users
 {
@@ -11,6 +10,6 @@ namespace MeetupPlatform.Common.Models.Users
         [Required]
         public string Name { get; set; }
 
-        public virtual List<RolePermission> RolePermissions { get; set; }
+        public ICollection<Permission> Permissions { get; set; }
     }
 }

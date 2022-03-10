@@ -22,7 +22,7 @@ namespace MeetupPlatform.Common.Models.MeetUps
         public int MeetupId { get; set; }
 
         [ForeignKey("MeetupId")]
-        public virtual Meetup Meetup { get; set; }
+        public virtual Meetup? Meetup { get; set; }
 
         public string? Description { get; set; }
               

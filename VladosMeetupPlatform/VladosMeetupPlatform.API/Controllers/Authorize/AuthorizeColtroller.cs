@@ -2,7 +2,6 @@
 using MeetupPlatform.Common.Models.AuthenticationModels;
 using MeetupPlatform.Infrastructure.Services.AuthenticationService;
 using MeetupPlatform.Infrastructure.Services.Interfacies;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -62,8 +61,7 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
         }
 
         [HttpPut]
-        [Route("Login")]
-        public async Task<IActionResult> LogInAsync([FromBody] RegisterData data)
+        public async Task<IActionResult> LogInAsync([FromBody] LoginData data)
         {
             if (data.Login == null
                 && data.Password == null)
@@ -85,40 +83,38 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
             {
                 _logger.LogWarning("Login data was incorrect");
 
-                return Ok(false);
+                return BadRequest();
             }
 
             var now = DateTime.UtcNow;
 
-            //var identity = Authenticate(
-            //     user.Id.ToString(),
-            //     user.Role.Name,
-            //     data.Login);
+            var identity = Authenticate(
+                 user.Id.ToString(),
+                 user.Role.Name,
+                 data.Login);
 
-            //var jwt = new JwtSecurityToken(
-            //        issuer: AuthOptions.Issuer,
-            //        audience: AuthOptions.Audience,
-            //        notBefore: now,
-            //        claims: identity.Claims,
-            //        expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LifeTime)),
-            //        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            var jwt = new JwtSecurityToken(
+                    issuer: AuthOptions.Issuer,
+                    audience: AuthOptions.Audience,
+                    notBefore: now,
+                    claims: identity.Claims,
+                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LifeTime)),
+                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
 
-            //var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+           
+            var response = new
+            {
+                access_token = encodedJwt,
+                username = identity.Name
+            };
 
-            //var response = new
-            //{
-            //    access_token = encodedJwt,
-            //    username = identity.Name
-            //};
+            Response.Cookies.Append("Token", encodedJwt);
 
-            //Response.Cookies.Append("Token", encodedJwt);
-
-            //return Ok(response);
-            return Ok();
+            return Ok(response);
         }
 
         [HttpPost]
-        //[Route("Register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterData data)
         {
             if (data.Login == null
@@ -138,7 +134,7 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
 
             var user = await _userService
                 .AddUserAsync(data.User);
-            ///////////////////////////////////////
+
             await _authService.Register(
                 data.Login,
                 data.Password,

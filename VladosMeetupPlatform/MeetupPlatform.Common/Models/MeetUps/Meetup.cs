@@ -1,5 +1,4 @@
-﻿using MeetupPlatform.Common.Models.HelperModels;
-using MeetupPlatform.Common.Models.Users;
+﻿using MeetupPlatform.Common.Models.Users;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -27,7 +26,7 @@ namespace MeetupPlatform.Common.Models.MeetUps
         public int UserOrganizerId { get; set; }
 
         [ForeignKey("UserOrganizerId")]
-        public virtual User Organizer { get; set; }
+        public virtual User? Organizer { get; set; }
 
         public string? Description { get; set; }
 
@@ -39,9 +38,5 @@ namespace MeetupPlatform.Common.Models.MeetUps
         public virtual Place? Place { get; set; }
 
         public virtual List<Step>? Steps { get; set; }
-
-        public virtual List<Follower>? Followers { get; set; }
-
-        public virtual List<MeetupVisitor>? UserVisitors { get; set; }
     }
 }

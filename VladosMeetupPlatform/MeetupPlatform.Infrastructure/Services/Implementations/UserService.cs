@@ -1,5 +1,4 @@
 ﻿using MeetupPlatform.Common.Models.Users;
-using MeetupPlatform.Common.Models.ViewModels;
 using MeetupPlatform.Infrastructure.Database;
 using MeetupPlatform.Infrastructure.Services.Interfacies;
 using Microsoft.EntityFrameworkCore;
@@ -25,18 +24,15 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
                 if (exUser is null)
                 {
-                    await _meetupPlatformContext.AddAsync(newUser);
+                    await _meetupPlatformContext.Users.AddAsync(newUser);
 
                     await _meetupPlatformContext.SaveChangesAsync();
 
                     return newUser;
                 }
-                return null;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public async Task<bool> BlockUser(int Id)
@@ -59,12 +55,14 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<User> GetUserByIdAsync(int userId)
         {
+            if(userId < 1)
+            {
+                return null;
+            }
+
             var user = await _meetupPlatformContext.Users
                 .Include(user => user.Role)
-                    .ThenInclude(role => role.RolePermissions)
-                        .ThenInclude(rolePerm => rolePerm.Permission)
-                .Include(user => user.MeetupVisitors)
-                    .ThenInclude(meetupVisitor => meetupVisitor.User)
+                        .ThenInclude(role => role.Permissions)
                 .FirstOrDefaultAsync(user => user.Id == userId);
 
             return user;
@@ -72,86 +70,67 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<User> UpdateUserAsync(User newUser)
         {
-            var exUser = await _meetupPlatformContext.Users
+            if(newUser is null)
+            {
+                var exUser = await _meetupPlatformContext.Users
                 .FirstOrDefaultAsync(user => user.Id == newUser.Id);
 
-            if (exUser is not null)
-            {
-                exUser.Age = newUser.Age;
+                if (exUser is not null)
+                {
+                    exUser.Age = newUser.Age;
 
-                exUser.Email = newUser.Email;
+                    exUser.Email = newUser.Email;
 
-                exUser.Name = newUser.Name;
+                    exUser.Name = newUser.Name;
 
-                _meetupPlatformContext.Users.Update(exUser);
+                    _meetupPlatformContext.Users.Update(exUser);
 
-                await _meetupPlatformContext.SaveChangesAsync();
+                    await _meetupPlatformContext.SaveChangesAsync();
 
-                return exUser;
+                    return exUser;
+                }
             }
+
             return null;
         }
 
-        public async Task<IEnumerable<UserViewModel>> GetAllAsync()
+        public async Task<bool> DeleteUserAsync(int userId)
+        {
+            if(userId > 0)
+            {
+                var user = await _meetupPlatformContext.Users
+                    .FirstOrDefaultAsync(user => user.Id == userId);
+                
+                if (user is not null)
+                {
+                    _meetupPlatformContext.Users.Remove(user);
+
+                    await _meetupPlatformContext.SaveChangesAsync();
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
             var users = await _meetupPlatformContext.Users
+                .Include(user => user.Role)
+                    .ThenInclude(role => role.Permissions)
                 .ToListAsync();
 
-            var viewUsers = new List<UserViewModel>();
-
-            foreach (var user in users)
-            {
-                var role = await _meetupPlatformContext.Roles
-                    .FirstOrDefaultAsync(role => role.Id == user.RoleId);
-
-                var viewUser = new UserViewModel(user);
-
-                var viewRole = await GetViewRole(role);
-
-                viewUser.Role = viewRole;
-
-                viewUsers.Add(viewUser);
-            }
-
-            return viewUsers;
+            return users;
         }
 
-        public async Task<IEnumerable<RoleViewModel>> GetRoles()
+        public async Task<IEnumerable<Role>> GetRoles()
         {
             var roles = await _meetupPlatformContext.Roles
+                .Include(role => role.Permissions)
                 .ToListAsync();
 
-            var rolesList = new List<RoleViewModel>();
-
-            foreach (var role in roles)
-            {
-                var newRole = await GetViewRole(role);
-
-                rolesList.Add(newRole);
-            }
-
-            return rolesList;
-        }
-
-        private async Task<RoleViewModel> GetViewRole(Role role)
-        {
-            var permissionsId = await _meetupPlatformContext.RolePermissions
-                    .Where(rp => rp.RoleId == role.Id)
-                    .Select(perm => perm.PermissionId)
-                    .ToListAsync();
-
-            var perms = await _meetupPlatformContext.Permissions
-                .Where(perm => permissionsId.Contains(perm.Id))
-                .ToListAsync();
-
-            var newRole = new RoleViewModel()
-            {
-                Id = role.Id,
-                Name = role.Name,
-                Permissions = perms
-            };
-
-            return newRole;
+            return roles;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using MeetupPlatform.Common.Models.Users;
-using MeetupPlatform.Common.Models.ViewModels;
 
 namespace MeetupPlatform.Infrastructure.Services.Interfacies
 {
@@ -7,7 +6,7 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
     {
         Task<bool> BlockUser(int Id);
 
-        Task<IEnumerable<UserViewModel>> GetAllAsync();
+        Task<IEnumerable<User>> GetAllAsync();
 
         Task<User> GetUserByIdAsync(int userId);
 
@@ -15,6 +14,8 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
 
         Task<User> UpdateUserAsync(User user);
 
-        Task<IEnumerable<RoleViewModel>> GetRoles();
+        Task<IEnumerable<Role>> GetRoles();
+
+        Task<bool> DeleteUserAsync(int userId);
     }
 }

@@ -16,13 +16,15 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<Meetup> AddMeetupAsync(Meetup meetup)
         {
-            if (meetup is not null)
+            if (meetup is not null
+                && meetup.Id == 0)
             {
                 await _meetupPlatformContext.Meetups.AddAsync(meetup);
 
-                await _meetupPlatformContext.SaveChangesAsync();
+                var org = await _meetupPlatformContext.Users
+                    .FirstOrDefaultAsync(user => user.Id == meetup.UserOrganizerId);
 
-                return meetup;
+                await _meetupPlatformContext.SaveChangesAsync();
             }
 
             return meetup;
@@ -30,7 +32,7 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<bool> DeleteMeetupByIdAsync(int id)
         {
-            if (id != 0)
+            if (id > 0)
             {
                 var exMeetup = await _meetupPlatformContext.Meetups
                     .AsNoTracking()
@@ -48,7 +50,7 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             return false;
         }
 
-        public async Task<IEnumerable<Meetup>> GetAllMeetupsForVisitorAsync()
+        public async Task<IEnumerable<Meetup>> GetAllMeetupsAsync()
         {
             var meetups = await _meetupPlatformContext.Meetups
                 .Include(meetup => meetup.Place)
@@ -59,33 +61,15 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             return meetups;
         }
 
-        public async Task<Meetup> GetMeetupByIdForOrganiserAsync(int id)
+        public async Task<Meetup> GetMeetupByIdAsync(int id)
         {
             var meetup = await _meetupPlatformContext.Meetups
-                .Include(meetup => meetup.Followers)
                 .Include(meetup => meetup.Place)
                 .Include(meetup => meetup.Steps)
                     .ThenInclude(step => step.UserSpeaker)
-                .Include(meetup => meetup.UserVisitors)
-                    .ThenInclude(userVisitor => userVisitor.User)
                 .FirstOrDefaultAsync(meetup => meetup.Id == id);
 
             return meetup;
-        }
-
-        public async Task<Meetup> GetMeetupByIdForVisitorAsync(int id)
-        {
-            if (id != 0)
-            {
-                var meetup = await _meetupPlatformContext.Meetups
-                    .Include(meetup => meetup.Place)
-                    .Include(meetup => meetup.Steps)
-                        .ThenInclude(step => step.UserSpeaker)
-                    .FirstOrDefaultAsync(meetup => meetup.Id == id);
-
-                return meetup;
-            }
-            return null;
         }
 
         public async Task<bool> UpdateMeetupAsync(Meetup newMeetup)
@@ -119,6 +103,7 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             }
             return false;
         }
+
         public async Task<bool> AddStepAsync(Step step)
         {
             if (step is not null)
@@ -134,15 +119,16 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<bool> DeleteStepAsync(int id)
         {
-            if (id != 0)
+            if (id > 0)
             {
                 var exStep = await _meetupPlatformContext.Steps
-                    .AsNoTracking()
                     .FirstOrDefaultAsync(step => step.Id == id);
 
                 if (exStep is not null)
                 {
                     _meetupPlatformContext.Steps.Remove(exStep);
+
+                    await _meetupPlatformContext.SaveChangesAsync();
                 }
                 return true;
             }

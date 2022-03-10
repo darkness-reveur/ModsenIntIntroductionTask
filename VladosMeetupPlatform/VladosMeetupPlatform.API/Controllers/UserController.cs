@@ -1,10 +1,11 @@
-﻿using MeetupPlatform.Infrastructure.Services.Interfacies;
+﻿using MeetupPlatform.Common.Models.Users;
+using MeetupPlatform.Infrastructure.Services.Interfacies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VladosMeetupPlatform.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/User")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -16,8 +17,6 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        [Route("GetAllUsers")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService
@@ -32,17 +31,36 @@ namespace VladosMeetupPlatform.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("GetUser")]
-        public async Task<IActionResult> GetUser()
+        public async Task<IActionResult> GetUser(int id)
         {
-            if(true)
+            if(id > 0)
             {
-                var user = _userService.GetUserByIdAsync(1);
+                var user = _userService.GetUserByIdAsync(id);
 
                 return Ok(user);
             }
             return BadRequest();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            if(id > 0)
+            {
+                var isDeleted = await _userService.DeleteUserAsync(id);
+
+                return Ok(isDeleted);
+            }
+            return BadRequest();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser(User newUser)
+        {
+            var user = _userService.UpdateUserAsync(newUser);
+
+            return Ok(user);
         }
     }
 }
