@@ -67,12 +67,12 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             return null;            
         }
 
-        public async Task<User> UpdateUserAsync(User newUser)
+        public async Task<User> UpdateUserAsync(User newUser, int id)
         {
             if (newUser is null)
             {
                 var exUser = await _meetupPlatformContext.Users
-                .FirstOrDefaultAsync(user => user.Id == newUser.Id);
+                .FirstOrDefaultAsync(user => user.Id == id);
 
                 if (exUser is not null)
                 {

@@ -12,9 +12,9 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
 
         Task<bool> DeleteMeetupByIdAsync(int id);
 
-        Task<bool> UpdateMeetupAsync(Meetup meetup);
+        Task<bool> UpdateMeetupAsync(Meetup meetup, int id);
 
-        Task<bool> AddStepAsync(Step step);
+        Task<Meetup> AddStepAsync(Step step);
 
         Task<bool> UpdateStepAsync(Step step);
 

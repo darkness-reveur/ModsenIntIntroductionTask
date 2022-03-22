@@ -12,7 +12,7 @@ namespace MeetupPlatform.Infrastructure.Services.Interfacies
 
         Task<User> AddUserAsync(User user);
 
-        Task<User> UpdateUserAsync(User user);
+        Task<User> UpdateUserAsync(User user, int id);
 
         Task<IEnumerable<Role>> GetRoles();
 

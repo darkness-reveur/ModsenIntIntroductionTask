@@ -10,7 +10,7 @@ using VladosMeetupPlatform.API.Auth;
 
 namespace VladosMeetupPlatform.API.Controllers.Authorize
 {
-    [Route("api/Authorize")]
+    [Route("api/authorize/")]
     [ApiController]
     public class AuthorizeColtroller : ControllerBase
     {
@@ -68,16 +68,16 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
                     $"Got an error. Login={data.Login} | Password={data.Password}",
                     new ArgumentNullException());
 
-                return Ok(false);
+                return BadRequest();
             }
 
             var user = await _authService.LogIn(data);
 
-            if (user == null)
+            if (user is null)
             {
                 _logger.LogWarning("Login data was incorrect");
 
-                return BadRequest();
+                return NotFound();
             }
 
             var now = DateTime.UtcNow;
