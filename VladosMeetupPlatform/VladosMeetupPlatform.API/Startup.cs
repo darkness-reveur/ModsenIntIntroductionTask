@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using VladosMeetupPlatform.API.Auth;
 
@@ -38,6 +39,11 @@ namespace VladosMeetupPlatform.API
                 options.UseNpgsql(Configuration
                     .GetSection("ConnectionStrings")
                         .GetValue<string>("DefaultDbConnection")));
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meetup platform api", Version = "v1" });
+            });
 
             services.RegisterDependesy();
 
@@ -87,6 +93,13 @@ namespace VladosMeetupPlatform.API
             {
                 app.UseExceptionHandler("/Error");
             }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vlados meetup platform V1");
+            });
 
             app.UseRouting();
 
