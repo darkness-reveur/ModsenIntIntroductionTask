@@ -10,7 +10,7 @@ using VladosMeetupPlatform.API.Auth;
 
 namespace VladosMeetupPlatform.API.Controllers.Authorize
 {
-    [Route("api/authorize/")]
+    [Route("api/")]
     [ApiController]
     public class AuthorizeColtroller : ControllerBase
     {
@@ -56,7 +56,15 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
             return identity;
         }
 
-        [HttpPut]
+        /// <summary>
+        /// Authorizes the user using login and password
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>JWT token</returns>
+        [HttpPost("token")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> LogInAsync([FromBody] LoginData data)
         {
             if (data.Login == null
@@ -100,15 +108,19 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
             var response = new
             {
                 access_token = encodedJwt,
-                username = identity.Name
+                userName = identity.Name
             };
-
-            Response.Cookies.Append("Token", encodedJwt);
 
             return Ok(response);
         }
 
-        [HttpPost]
+        /// <summary>
+        /// Registers a user using login password and personal data
+        /// </summary>
+        /// <param name="data"></param>
+        [HttpPost("users")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterData data)
         {
             if (data.Login == null
@@ -135,7 +147,7 @@ namespace VladosMeetupPlatform.API.Controllers.Authorize
 
                 await _authService.Register(data);
 
-                return Ok(user);
+                return CreatedAtAction(nameof(UserController.GetUserById), new { id = user.Id }, user);
             }
 
             return BadRequest();

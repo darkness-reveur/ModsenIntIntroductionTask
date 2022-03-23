@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace VladosMeetupPlatform.API.Controllers
 {
+    /// <summary>
+    /// Main controller
+    /// </summary>
     [Route("api/meetups/")]
     [ApiController]
     public class MeetupController : ControllerBase
@@ -16,16 +19,24 @@ namespace VladosMeetupPlatform.API.Controllers
             _meetupService = meetupService;
         }
 
+        /// <summary>
+        /// Gets all of meetups
+        /// </summary>
+        /// <returns>List of all meetups</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Meetup>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAllMeetups()
         {
             var meetups = await _meetupService.GetAllMeetupsAsync();
 
-            return meetups is not null ? Ok(meetups) : NotFound();
+            return Ok(meetups);
         }
 
+        /// <summary>
+        /// Gets the meetup using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        /// <returns>Meetup with entered id</returns>
         [HttpGet("{id}/")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Meetup))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -39,9 +50,12 @@ namespace VladosMeetupPlatform.API.Controllers
                 return meetup is not null ? Ok(meetup) : NotFound();
             }
 
-            return BadRequest();
+            return BadRequest("Incorrect Id");
         }
-
+        /// <summary>
+        /// Adds new meetup
+        /// </summary>
+        /// <param name="meetup"></param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,12 +72,17 @@ namespace VladosMeetupPlatform.API.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Updates the meetup using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        /// <param name="meetup"></param>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "editor")]
-        public async Task<IActionResult> UpdateMeetup(int id, [FromBody]Meetup meetup)
+        public async Task<IActionResult> UpdateMeetup(int id, [FromBody] Meetup meetup)
         {
             if (meetup is not null && id > 0)
             {
@@ -75,6 +94,10 @@ namespace VladosMeetupPlatform.API.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Deletes the meetup using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,6 +115,11 @@ namespace VladosMeetupPlatform.API.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Adds new step in meetup with entered id
+        /// </summary>
+        /// <param name="meetupId" example="123"></param>
+        /// <param name="step"></param>
         [HttpPost("{meetupId}/steps/")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -123,6 +151,11 @@ namespace VladosMeetupPlatform.API.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Deletes the step in meetup with specified id, using specified id
+        /// </summary>
+        /// <param name="meetupId" example="123"></param>
+        /// <param name="stepId" example="123"></param>
         [HttpDelete("{meetupId}/steps/{stepId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -42,7 +42,16 @@ namespace VladosMeetupPlatform.API
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meetup platform api", Version = "v1" });
+                c.SwaggerDoc(
+                    "v1", 
+                    new OpenApiInfo 
+                    { 
+                        Title = "Meetup platform api", 
+                        Version = "v1" 
+                    });
+
+                var filePath = Path.Combine(AppContext.BaseDirectory, "VladosMeetupPlatform.API.xml");
+                c.IncludeXmlComments(filePath);
             });
 
             services.RegisterDependesy();
@@ -117,8 +126,9 @@ namespace VladosMeetupPlatform.API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints
-                    .MapDefaultControllerRoute();
+                endpoints.MapDefaultControllerRoute();
+
+                endpoints.MapSwagger();
             });
         }
     }

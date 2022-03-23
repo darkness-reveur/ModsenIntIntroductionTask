@@ -16,23 +16,31 @@ namespace VladosMeetupPlatform.API.Controllers
             _userService = userService;
         }
 
+        /// <summary>
+        /// Gets all of users
+        /// </summary>
+        /// <returns>List all of users</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<User>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllAsync();
 
-            return users is not null ? Ok(users) : NotFound();
+            return Ok(users);
         }
 
+        /// <summary>
+        /// Gets the user using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        /// <returns>User with entered id</returns>
         [HttpGet("{id}/")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetUser(int id)
+        public async Task<IActionResult> GetUserById(int id)
         {
             if (id > 0)
             {
@@ -43,6 +51,10 @@ namespace VladosMeetupPlatform.API.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Deletes the user using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,6 +71,11 @@ namespace VladosMeetupPlatform.API.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Updates user with specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        /// <param name="newUser"></param>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
