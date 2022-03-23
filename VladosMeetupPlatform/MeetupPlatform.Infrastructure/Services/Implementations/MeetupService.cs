@@ -34,21 +34,19 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
 
         public async Task<bool> DeleteMeetupByIdAsync(int id)
         {
-            if (id > 0)
+            var exMeetup = await _meetupPlatformContext.Meetups
+                .AsNoTracking()
+                .FirstOrDefaultAsync(meetup => meetup.Id == id);
+
+            if (exMeetup is not null)
             {
-                var exMeetup = await _meetupPlatformContext.Meetups
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(meetup => meetup.Id == id);
+                _meetupPlatformContext.Meetups.Remove(exMeetup);
 
-                if (exMeetup is not null)
-                {
-                    _meetupPlatformContext.Meetups.Remove(exMeetup);
+                await _meetupPlatformContext.SaveChangesAsync();
 
-                    await _meetupPlatformContext.SaveChangesAsync();
-
-                    return true;
-                }
+                return true;
             }
+
             return false;
         }
 
@@ -78,72 +76,66 @@ namespace MeetupPlatform.Infrastructure.Services.Implementations
             return null;
         }
 
-        public async Task<bool> UpdateMeetupAsync(Meetup newMeetup)
+        public async Task<bool> UpdateMeetupAsync(Meetup newMeetup, int id)
         {
-            if (newMeetup is not null)
+            var exMeetup = await _meetupPlatformContext.Meetups
+                .FirstOrDefaultAsync(meetup => meetup.Id == id);
+
+            if (exMeetup is not null)
             {
-                var exMeetup = await _meetupPlatformContext.Meetups
-                    .FirstOrDefaultAsync(meetup => meetup.Id == newMeetup.Id);
+                exMeetup.Name = newMeetup.Name;
 
-                if(exMeetup is not null)
-                {
-                    exMeetup.Name = newMeetup.Name;
+                exMeetup.Description = newMeetup.Description;
 
-                    exMeetup.Description = newMeetup.Description;
+                exMeetup.StartTime = newMeetup.StartTime;
 
-                    exMeetup.StartTime = newMeetup.StartTime;
+                exMeetup.EndTime = newMeetup.EndTime;
 
-                    exMeetup.EndTime = newMeetup.EndTime;
+                exMeetup.IsMeetForAuthorizedUsers = newMeetup.IsMeetForAuthorizedUsers;
 
-                    exMeetup.IsMeetForAuthorizedUsers = newMeetup.IsMeetForAuthorizedUsers;
+                exMeetup.CountOfVisitors = newMeetup.CountOfVisitors;
 
-                    exMeetup.CountOfVisitors = newMeetup.CountOfVisitors;
+                exMeetup.Place = newMeetup.Place;
 
-                    exMeetup.Place = newMeetup.Place;
+                exMeetup.Steps = newMeetup.Steps;
 
-                    exMeetup.Steps = newMeetup.Steps;
+                await _meetupPlatformContext.SaveChangesAsync();
 
-                    await _meetupPlatformContext.SaveChangesAsync();
-
-                    return true;
-                }
+                return true;
             }
+
             return false;
         }
 
-        public async Task<bool> AddStepAsync(Step step)
+        public async Task<Meetup> AddStepAsync(Step step)
         {
-            if (step is not null)
+            var exMeetup = await _meetupPlatformContext.Meetups
+                .FirstOrDefaultAsync(meetup => meetup.Id == step.MeetupId);
+
+            if (exMeetup is not null)
             {
-                var exMeetup = await _meetupPlatformContext.Meetups
-                    .FirstOrDefaultAsync(meetup => meetup.Id == step.MeetupId);
+                exMeetup.Steps.Add(step);
 
-                if(exMeetup is not null)
-                {
-                    exMeetup.Steps.Add(step);
+                await _meetupPlatformContext.SaveChangesAsync();
 
-                    await _meetupPlatformContext.SaveChangesAsync();
-
-                    return true;
-                }                
+                return exMeetup;
             }
-            return false;
+
+            return null;
         }
 
         public async Task<bool> DeleteStepAsync(int id)
         {
-            if (id > 0)
+            var exStep = await _meetupPlatformContext.Steps
+                .AsNoTracking()
+                .FirstOrDefaultAsync(step => step.Id == id);
+
+            if (exStep is not null)
             {
-                var exStep = await _meetupPlatformContext.Steps
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(step => step.Id == id);
+                _meetupPlatformContext.Steps.Remove(exStep);
 
-                if (exStep is not null)
-                {
-                    _meetupPlatformContext.Steps.Remove(exStep);
+                await _meetupPlatformContext.SaveChangesAsync();
 
-                    await _meetupPlatformContext.SaveChangesAsync();
-                }
                 return true;
             }
             return false;

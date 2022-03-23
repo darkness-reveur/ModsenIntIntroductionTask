@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace VladosMeetupPlatform.API.Controllers
 {
-    [Route("api/[controller]")]
+    /// <summary>
+    /// Main controller
+    /// </summary>
+    [Route("api/meetups/")]
     [ApiController]
     public class MeetupController : ControllerBase
     {
@@ -16,39 +19,46 @@ namespace VladosMeetupPlatform.API.Controllers
             _meetupService = meetupService;
         }
 
+        /// <summary>
+        /// Gets all of meetups
+        /// </summary>
+        /// <returns>List of all meetups</returns>
         [HttpGet]
-        [Route("GetAllMeetups")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Meetup>))]
         public async Task<IActionResult> GetAllMeetups()
         {
-            var meetups = await _meetupService
-                .GetAllMeetupsAsync();
+            var meetups = await _meetupService.GetAllMeetupsAsync();
 
-            if (meetups is not null)
-            {
-                return Ok(meetups);
-            }
-
-            return BadRequest();
+            return Ok(meetups);
         }
 
-        [HttpGet]
-        [Route("GetMeetupById")]
-        [Authorize]
+        /// <summary>
+        /// Gets the meetup using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        /// <returns>Meetup with entered id</returns>
+        [HttpGet("{id}/")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Meetup))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMeetupById(int id)
         {
-            var meetup = await _meetupService
-                .GetMeetupByIdAsync(id);
-
-            if (meetup is not null)
+            if (id > 0)
             {
-                return Ok(meetup);
+                var meetup = await _meetupService.GetMeetupByIdAsync(id);
+
+                return meetup is not null ? Ok(meetup) : NotFound();
             }
 
-            return BadRequest();
+            return BadRequest("Incorrect Id");
         }
-
-        [HttpGet]
-        [Route("AddMeetup")]
+        /// <summary>
+        /// Adds new meetup
+        /// </summary>
+        /// <param name="meetup"></param>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = "editor")]
         public async Task<IActionResult> AddMeetup(Meetup meetup)
         {
@@ -56,67 +66,116 @@ namespace VladosMeetupPlatform.API.Controllers
             {
                 var addedMeetup = await _meetupService.AddMeetupAsync(meetup);
 
-                return Ok(addedMeetup);
+                return CreatedAtAction(nameof(GetMeetupById), new { id = addedMeetup.Id }, addedMeetup);
             }
 
             return BadRequest();
         }
 
-        [HttpPut]
-        [Route("UpdateMeetup")]
+        /// <summary>
+        /// Updates the meetup using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        /// <param name="meetup"></param>
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "editor")]
-        public async Task<IActionResult> UpdateMeetup(Meetup meetup)
+        public async Task<IActionResult> UpdateMeetup(int id, [FromBody] Meetup meetup)
         {
-            if (meetup is not null)
+            if (meetup is not null && id > 0)
             {
-                var updatedMeetup = await _meetupService.UpdateMeetupAsync(meetup);
+                var isUpdated = await _meetupService.UpdateMeetupAsync(meetup, id);
 
-                return Ok(updatedMeetup);
+                return isUpdated ? NoContent() : NotFound();
             }
 
             return BadRequest();
         }
 
-        [HttpDelete]
-        [Route("DeleteMeetup")]
+        /// <summary>
+        /// Deletes the meetup using specified id
+        /// </summary>
+        /// <param name="id" example="123"></param>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "editor")]
         public async Task<IActionResult> DeleteMeetup(int id)
         {
-            var isDeleted = await _meetupService.DeleteMeetupByIdAsync(id);
-
-            if (isDeleted)
+            if (id > 0)
             {
-                return Ok();
+                var isDeleted = await _meetupService.DeleteMeetupByIdAsync(id);
+
+                return isDeleted ? NoContent() : NotFound();
             }
 
             return BadRequest();
         }
 
-        [HttpPost]
-        [Route("AddStep")]
+        /// <summary>
+        /// Adds new step in meetup with entered id
+        /// </summary>
+        /// <param name="meetupId" example="123"></param>
+        /// <param name="step"></param>
+        [HttpPost("{meetupId}/steps/")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "editor")]
-        public async Task<IActionResult> AddStepToMeetup(Step step)
+        public async Task<IActionResult> AddStepToMeetup(int meetupId, [FromBody] Step step)
         {
-            if(step is not null)
+            if (step is not null && meetupId > 0)
             {
-                await _meetupService.AddStepAsync(step);
+                var meetup = await _meetupService.GetMeetupByIdAsync(meetupId);
 
-                return Ok(step);
+                if (meetup is null)
+                {
+                    return BadRequest();
+                }
+
+                var addedMeetup = _meetupService.AddStepAsync(step);
+
+                if (addedMeetup is not null)
+                {
+                    return CreatedAtAction(nameof(GetMeetupById), new { id = addedMeetup.Id }, addedMeetup);
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
-            return BadRequest(false);
+
+            return BadRequest();
         }
 
-        [HttpDelete]
-        [Route("DeleteStep")]
-        [Authorize(Roles = "editor")]
-        public async Task<IActionResult> DeleteStep(int stepId)
+        /// <summary>
+        /// Deletes the step in meetup with specified id, using specified id
+        /// </summary>
+        /// <param name="meetupId" example="123"></param>
+        /// <param name="stepId" example="123"></param>
+        [HttpDelete("{meetupId}/steps/{stepId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteStep(int meetupId, int stepId)
         {
-            if (stepId > 0)
+            if (stepId > 0 && meetupId > 0)
             {
-                await _meetupService.DeleteStepAsync(stepId);
+                var meetup = await _meetupService.GetMeetupByIdAsync(meetupId);
 
-                return Ok();
+                if (meetup is null)
+                {
+                    return NotFound();
+                }
+
+                var isDeleted = await _meetupService.DeleteStepAsync(stepId);
+
+                return isDeleted ? NoContent() : NotFound();
             }
+
             return BadRequest();
         }
     }

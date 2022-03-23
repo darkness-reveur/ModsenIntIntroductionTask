@@ -6,7 +6,6 @@ namespace MeetupPlatform.Common.Models.MeetUps
 {
     public class Meetup
     {
-
         [Key]
         public int Id { get; set; }
 
